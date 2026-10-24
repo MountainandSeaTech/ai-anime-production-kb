@@ -26,6 +26,13 @@ AI 视频动漫短剧制作知识库 —— 从提示词工程到剪辑合成的
 | 12-规范与踩坑 | 制作规范、常见崩坏与规避 | 10 |
 | 13-技能与流程 | 工作流、管线设计、资产表规范 | 8 |
 
+自己的做的一点作品
+【终于把镜头的流畅感解决了】 https://www.bilibili.com/video/BV1iWpd6CEmv/?share_source=copy_web&vd_source=401695a090d3a12016523203ac0e88f6
+【钟灵儿】 https://www.bilibili.com/video/BV1xwJy6JEu8/?share_source=copy_web&vd_source=401695a090d3a12016523203ac0e88f6
+
+有啥使用上的问题可以
+联系QQ群：1131851799
+
 ## 开源协议
 
 [CC BY 4.0](LICENSE) —— 可自由使用、修改、分发（含商用），需署名原作者。
