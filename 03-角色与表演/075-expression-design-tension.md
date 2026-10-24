@@ -1,12 +1,12 @@
 ---
 title: 表情设计张力（面部结构）
 category: 角色与表演
-tags: [张力, 表情, 面部结构, 设计, 表情库]
-source: 拆解
+tags: [张力, 表情, 面部结构, 设计, 表情库, 防同质化, 人脸描写, 角色锚定]
+source: 拆解+联网学习
 created: 2026-10-13
-updated: 2026-10-13
-summary: 表情设计靠面部结构夸张+表情库分层；关键时刻用极端表情，日常用克制的反差
-related: [024, 030, 070, 072]
+updated: 2026-10-23
+summary: 表情设计靠面部结构夸张+表情库分层；防同质化靠"可画的几何结构"而非形容词，Bones·Marks·Anchor三锚法+特征维度速查表
+related: [024, 030, 070, 072, 233, 424]
 ---
 
 # 表情设计张力（面部结构）
@@ -53,6 +53,57 @@ related: [024, 030, 070, 072]
 ### 面部形变（060）
 - 关键瞬间面部形变——脸压扁/扭曲/拉长
 - 形变=情绪极值的视觉化
+
+## 防同质化：人脸结构描写维度表
+
+### 核心原则：写"可画的几何结构"，不写形容词
+- **同脸症的根源**：提示词全用 `beautiful/gorgeous/handsome/pretty` 这类无执行信息的形容词，模型只能套默认脸
+- **解法**：让脸变得具体，只能靠**可被画出来的几何结构**——脸型、颌线、眉骨、颧骨、鼻梁、眼距、唇形
+- 记忆口诀：**Bones（骨骼）· Marks（痕迹）· Anchor（锚点）**三锚法
+- 若角色走**可爱/萌系**路线，把本节所有维度向"幼态圆润"统一偏置，见 424「可爱女生描写手法」
+
+### Bones · Marks · Anchor 三锚法
+| 锚层 | 内容 | 作用 |
+|---|---|---|
+| Bones 骨骼 | 脸型/颌线/眉骨/颧骨/鼻梁/眼距/唇形 | 决定面部骨架轮廓，同脸症主要靠这层破 |
+| Marks 痕迹 | 肤色/肤质/年龄痕迹（皱纹/法令纹/雀斑/疤/痣/毛孔/胡茬） | 决定皮肤质感与真实年龄感 |
+| Anchor 锚点 | 一个不可替代的识别物（左眼下痣、断眉、歪鼻梁、缺颗牙、耳洞） | 潜意识锁角色，见 233 |
+
+### 特征维度速查（每项挑 1 个词写进提示词）
+**脸型 Face shape**：oval / round / square / heart / diamond / rectangular-oblong / triangular / long / wide / narrow / broad
+**颌线 Jawline**：sharp / soft / angular / square / rounded / pointed / wide / narrow / defined / weak
+**下巴 Chin**：pointed / square / round / long / short / jutting-protruding / receding-weak / cleft / double
+**颧骨 Cheekbones**：high / low / angular / chiseled / sharp / strong / prominent / sculpted / broad / wide / fine / delicate / hollow cheeks
+**鼻子 Nose**：straight / aquiline-hooked / button-small / upturned-snub / flat / wide / bulbous / beak-shaped / crooked / long / narrow bridge
+**眼睛 Eyes**：almond / round / hooded / monolid / deep-set / close-set / wide-set / upturned / downturned / large / small / narrow
+**眉毛 Brows**：thick / thin / straight / arched / angled / bushy / sparse / high / low / furrowed
+**嘴唇 Lips**：full / thin / wide / narrow / heart-shaped / bow-shaped / downturned / upturned / asymmetrical
+**年龄/肤质 Age & skin**：freckles / acne scars / wrinkles / crow's feet / nasolabial folds / age spots / pores / stubble / five-o'clock shadow
+**锚点 Anchor**：scar / mole / birthmark / tattoo / missing tooth / crooked tooth / piercing / burn mark
+
+### Seedance / WAN3 必写公式
+- **Facial Details 至少写 3–4 项**（眼形 + 眉骨 + 鼻梁 + 唇形 + 颌线），这几项一起决定辨识度
+- 完整公式：`[Subject] + [Facial details 3-4项] + [Age/Ethnicity] + [Hair] + [Expression] + [Art style] + [Lighting] + [Camera angle]`
+- 年龄/族裔线索必须写：East Asian / Caucasian / African / South Asian；28yo / 55yo；模型靠这些锁定默认脸分布
+
+### 反例 vs 正例
+```
+Bad（全形容词，必同脸）：
+"a beautiful young woman, gorgeous face"
+
+Good（全可画结构，唯一脸）：
+"a 28yo East Asian woman, elongated oval face, sharp defined jawline, high angular cheekbones,
+ straight narrow nose bridge, narrow deep-set monolid eyes, thin lips with closed-mouth smile,
+ thick straight eyebrows, a mole under the left eye"
+```
+
+### 防同质化自检清单
+- [ ] 脸型不与其他角色重复？
+- [ ] 至少 3 项面部几何结构被点名（眼/眉/鼻/唇/颌/颧）？
+- [ ] 有一个不可替代的锚点？
+- [ ] 没用 pretty/beautiful 当唯一描述？
+- [ ] 写了年龄+族裔线索？
+- [ ] 锚点已写入资产表"专属识别物"字段？
 
 ## 表情反差定律
 - 日常面瘫 → 关键极端=最大反差=最强峰

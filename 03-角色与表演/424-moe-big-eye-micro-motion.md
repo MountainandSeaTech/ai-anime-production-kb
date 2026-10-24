@@ -1,12 +1,12 @@
 ---
 title: 萌系大眼微动专篇——眼越大，动作越小
 category: 角色与表演
-tags: [萌系, 大眼, 高光, 双层高光, 星形高光, 虎牙, 眯眼]
+tags: [萌系, 大眼, 高光, 双层高光, 星形高光, 虎牙, 眯眼, 可爱, 甜妹, 娃娃脸, 婴儿图式]
 source: 网络学习
 created: 2026-10-20
-updated: 2026-10-20
-summary: 萌系大眼把表情符号化：微动幅度与眼睛尺寸反相关；高光有无/形状=情绪开关（高光消失=黑化）；虎牙只跟微笑眯眼同框
-related: [163, 162, 165, 422, 423, 425, 426, 254]
+updated: 2026-10-23
+summary: 萌系大眼把表情符号化（幅度与眼尺寸反相关，高光=情绪开关，虎牙只配微笑）；可爱女生整体描写靠婴儿图式：圆脸/大眼/小鼻/短下巴/圆身体触发本能保护欲
+related: [075, 163, 162, 165, 416, 422, 423, 425, 426, 254, 233]
 ---
 
 # 萌系大眼微动专篇——眼越大，动作越小
@@ -116,6 +116,68 @@ related: [163, 162, 165, 422, 423, 425, 426, 254]
   iris shrinking, highlights quivering — classic anime shock
 ```
 - 负面词库：realistic eyes, detailed eye muscles, wrinkles around eyes, small irises（萌系生成时压写实倾向）
+
+## 可爱女生描写手法（Bones→Cute 改造）
+
+### 核心原理：可爱=触发婴儿图式（baby schema）
+- 人脑对"大额头/大眼/圆脸/小鼻小嘴/短下巴/圆身体"有本能的好感与保护欲（Lorenz 婴儿图式）——**可爱不是形容词，是一组几何比例**
+- 反面：棱角分明的颌线、尖削下巴、写实骨骼结构、高挺鼻梁 → 可爱值暴跌，走向"清冷/明艳"
+- 与 075 的关系：075 给人脸特征维度速查表，本节把那套维度**向"幼态圆润"方向统一偏置**
+
+### 1. 脸型与比例（幼态化是核心）
+- **娃娃脸 baby face**：短圆脸、圆润下巴、饱满苹果肌、脸颊带软肉
+- **头身比**：萌系 5–6 头身；chibi/SD 1:2~1:3（头部占身高 1/3~1/2）
+- 英文词：`round baby face, chubby soft cheeks, soft rounded jawline, small rounded chin, childlike proportions, large head-to-body ratio`
+- 禁忌词：`sharp jawline, angular face, prominent cheekbones, high nose bridge, defined bone structure`
+
+### 2. 五官甜妹配方（对照 075 特征维度）
+| 部位 | 甜妹配方 | 英文提示词 |
+|---|---|---|
+| 眼 | 大圆无辜杏眼、琉璃瞳、饱满卧蚕、纤长睫毛 | large round innocent eyes, glossy amber pupils, full aegyo-sal lower eyelids, long lashes |
+| 眉 | 浅淡平眉、细短眉 | thin light eyebrows, short straight brows |
+| 鼻 | 小巧鼻尖、翘鼻、几乎只点一个高光 | small upturned button nose, tiny nose with highlight only |
+| 唇 | 饱满果冻唇、樱唇、嘴角微扬 | plump cherry lips, small soft mouth, slight upturned corners |
+| 肤质 | 奶油水光肌、粉嫩通透 | dewy pinkish porcelain skin, smooth soft skin |
+
+### 3. 发型加分项（可爱度放大器，见 233 符号特征）
+双马尾 / 空气刘海 / 龙须碎发 / 丸子头 / 侧马尾 / 短发蘑菇头 / 蝴蝶结发饰
+英文：`twin tails, air bangs, wispy side locks, bun, side ponytail, bob cut, bow hair ornament`
+
+### 4. 表情与漫画符号
+- **腮红**：两侧脸颊低饱和粉色椭圆色块；害羞用斜线脸红 `///`（少女漫画符号）
+- **招牌萌笑**：眯眼弯月 + 单侧虎牙（见上方虎牙×眯眼联动规则）
+- **憧憬峰值**：星星眼 / 星形高光（见上方高光表）
+- **极简嘴**：猫嘴（ω形）/ 小圆点嘴 / 干脆不画嘴 = Q版萌
+英文：`pink blush circles on cheeks, /// blush lines, cat mouth (ω shaped), tiny dot mouth`
+
+### 5. 体态与小动作
+- 短手短脚 / 圆身体 / 内八 / 缩肩 / 抱膝坐 / 歪头 / 揪衣角 / 踮脚
+- 写作三公式（通用写法）：**独特外貌标记 + 传神神态 + 习惯性小动作**
+
+### 6. 三风格对照（防同质化：可爱不等于一种脸）
+| 风格 | 关键特征 | 用途 |
+|---|---|---|
+| 甜妹款 | 圆眼+卧蚕+小巧鼻尖+饱满唇+脸颊软肉 | 可爱基准 |
+| 清冷美人 | 浅淡眉+细长眼+薄唇+鹅蛋脸+冷白皮 | 对照，不可爱 |
+| 明艳挂 | 眼尾上翘+红唇+高鼻梁 | 对照，不可爱 |
+
+### 7. 提示词正例
+```
+a cute 18yo girl, round baby face, chubby soft cheeks, small rounded chin,
+large round innocent eyes with double highlights, glossy amber-brown pupils,
+full aegyo-sal lower eyelids, thin light eyebrows, small upturned button nose,
+plump cherry lips, dewy pinkish porcelain skin, twin tails with air bangs,
+soft rounded body, childlike 5-head proportions — sweet moe aesthetic
+```
+
+### 8. 可爱度自检
+- [ ] 脸型圆润无棱角？
+- [ ] 眼睛占脸比例大（萌系大眼，见 424 幅度缩放）？
+- [ ] 鼻子简化（小点/高光）？
+- [ ] 有腮红或卧蚕？
+- [ ] 头身比偏幼态？
+- [ ] 有一个独特外貌标记（防同脸，见 075 Bones·Marks·Anchor）？
+- [ ] 发型有辨识度？
 
 ## 备注
 - 高光提示词表来自 AI 插画社区实测（manga.jpn.org 整理），视频模型权重需降档；虎牙规则为库内既有规则+官方商品化惯例
