@@ -1,13 +1,20 @@
-\---  
-title: "Skill：单集制作本生成 episode-production-book"  
+---
+title: "Skill：单集制作本生成 episode-production-book"
+  
 tags: [Skill, 制作本, 剧本压缩表, 分镜表, 段提示词, WAN3, H3, 首尾帧, 四件套, 番剧流程]  
-category: 技能与流程  
-source: 原创  
-created: 2026-10-14  
-updated: 2026-10-23  
-summary: 番剧每集制作6步中的第1-4步流程Skill——精读压缩→分镜表→段提示词→首尾帧，沉淀自《天龙八部》S1E1 Wan/H3双版实践  
-related: [141, 145, 171, 177]  
-\---
+category: 技能与流程
+  
+source: 原创
+  
+created: 2026-10-14
+  
+updated: 2026-10-23
+  
+summary: 番剧每集制作6步中的第1-4步流程Skill——精读压缩→分镜表→段提示词→首尾帧，沉淀自《天龙八部》S1E1 Wan/H3双版实践
+  
+related: [141, 145, 171, 177]
+---
+
 
 # 单集制作本生成（Episode Production Book）
 
