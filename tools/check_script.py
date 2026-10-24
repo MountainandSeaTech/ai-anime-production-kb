@@ -163,8 +163,35 @@ def analyze_script(text):
     return result
 
 
-# ---------- 语义匹配：字符 bigram TF-IDF 余弦 ----------
+# ---------- 嵌入模型接入点（预留，默认不启用） ----------
+# 当前默认走 TF-IDF，不调用任何外部服务。
+# 需要更强的语义匹配时，在此处接入嵌入后端，即可通过 --semantic embed 启用。
+#
+# 接入约定：
+#   embed_scores(query: str, docs: list[str]) -> list[float]
+#   返回与 docs 等长的相似度列表（越大越相关）。
+#
+# 两种接入方式：
+#   1. 远程 API：设置环境变量 KB_EMBED_API（OpenAI 兼容 /v1/embeddings 端点）
+#      与 KB_EMBED_KEY，在函数内做 HTTP 请求；
+#   2. 本地模型：在函数内加载 sentence-transformers / ollama 计算向量。
+EMBED_API = os.environ.get("KB_EMBED_API", "")
+EMBED_KEY = os.environ.get("KB_EMBED_KEY", "")
 
+
+class EmbeddingNotConfigured(RuntimeError):
+    """嵌入后端尚未接入。"""
+
+
+def embed_scores(query, docs):
+    """预留接入点：未实现时抛出 EmbeddingNotConfigured，由调用方决定回退或中止。"""
+    raise EmbeddingNotConfigured(
+        "嵌入后端未接入。设置 KB_EMBED_API / KB_EMBED_KEY 并补全 embed_scores() 后可用；"
+        "当前可继续使用内置 TF-IDF 语义匹配。"
+    )
+
+
+# ---------- 语义匹配：字符 bigram TF-IDF 余弦 ----------
 def tokens(text):
     text = re.sub(r"[^\w\u4e00-\u9fff]+", " ", text.lower())
     toks = []
@@ -222,10 +249,36 @@ def main():
         target = argv[i + 1].lower()
         argv = argv[:i] + argv[i + 2:]
     per_shot = "--per-shot" in argv
-    semantic = "--semantic" in argv
+    semantic = None
+    if "--semantic" in argv:
+        i = argv.index("--semantic")
+        if i + 1 < len(argv) and argv[i + 1] in ("tfidf", "embed"):
+            semantic = argv[i + 1]
+            argv = argv[:i] + argv[i + 2:]
+        else:
+            semantic = "tfidf"
+            argv = argv[:i] + argv[i + 1:]
+
+    if semantic == "embed":
+        # 使用前确认：嵌入后端未接入时询问，用户不需要则不接
+        try:
+            embed_scores("测试", ["测试"])
+        except EmbeddingNotConfigured as e:
+            print(f"[提示] {e}")
+            try:
+                ans = input("是否改用内置 TF-IDF 语义匹配继续？[y/N] ").strip().lower()
+            except EOFError:
+                ans = ""
+            if ans in ("y", "yes"):
+                semantic = "tfidf"
+            else:
+                print("已取消（未接入嵌入后端）。")
+                return 0
+
     args = [a for a in argv if not a.startswith("--")]
     if not args:
-        print("用法: python check_script.py <剧本.md> [--md 报告.md] [--per-shot] [--semantic] [--target wan3]")
+        print("用法: python check_script.py <剧本.md> [--md 报告.md] [--per-shot] "
+              "[--semantic [tfidf|embed]] [--target wan3]")
         return
 
     script_path = args[0]
@@ -252,7 +305,9 @@ def main():
     lines.append(f"- 剧本：`{os.path.basename(script_path)}`（{len(sections)} 个分段）")
     scope_note = f"（target={target}，剔除非目标模型条目 {dropped} 条）" if target else f"（全部 {len(kb)} 条）"
     lines.append(f"- 知识库：`{ENTRIES}` {scope_note}")
-    if semantic:
+    if semantic == "embed":
+        lines.append("- 匹配方式：嵌入模型语义相似度")
+    elif semantic:
         lines.append("- 匹配方式：字符 bigram TF-IDF 语义相似度")
     lines.append("")
 
@@ -287,7 +342,17 @@ def main():
         lines.append(f"- **{d}**：仅 {len(supply[d])} 条（{names}）→ 建议补充 2–3 条专项")
 
     lines.append("\n## 三、推荐加载\n")
-    if semantic:
+    if semantic == "embed":
+        # 已接入嵌入后端时走这里；未接入会在启动阶段回退或中止
+        docs = [f"{it['title']} {it['tags']} {it['summary']}" for it in kb]
+        lines.append("| 分段 | 最相关条目（相似度） |")
+        lines.append("|---|---|")
+        for head, sec, _ in sections:
+            scores = embed_scores(sec, docs)
+            ranked = sorted(zip(scores, kb), key=lambda x: -x[0])[:3]
+            cell = "<br>".join(f"`{it['path']}` {it['title']}（{s:.2f}）" for s, it in ranked)
+            lines.append(f"| {head} | {cell} |")
+    elif semantic:
         vecs, idf = build_vectors(kb)
         lines.append("| 分段 | 最相关条目（相似度） |")
         lines.append("|---|---|")

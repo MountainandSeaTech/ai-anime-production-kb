@@ -18,8 +18,11 @@ python tools/check_script.py 剧本.md --semantic --target wan3
 ```
 
 - `--semantic`：用字符 bigram TF-IDF 余弦做语义匹配，按段落给出最相关条目（默认按能力词表匹配）
+- `--semantic embed`：尝试使用嵌入模型后端。当前仅预留接口，未接入时会先询问是否回退 TF-IDF，选择不需要则不接
 - `--target wan3`：只统计 Wan/可灵等目标模型适用的条目，剔除仅适配 Midjourney/SD/Sora 的条目
 - `--per-shot`：输出逐段推荐文件清单
+
+嵌入后端是可选能力，默认不启用、不发起任何外部请求。接入点在 `tools/check_script.py` 的 `embed_scores()`，配置环境变量 `KB_EMBED_API` / `KB_EMBED_KEY` 后补全函数即可启用。
 
 （脚本会自动识别两种布局：本地 `entries/` 目录，或仓库中直接位于根下的分类目录。）
 
