@@ -29,3 +29,19 @@ AI 视频动漫短剧制作知识库 —— 从提示词工程到剪辑合成的
 ## 开源协议
 
 [CC BY 4.0](LICENSE) —— 可自由使用、修改、分发（含商用），需署名原作者。
+
+## 支持这个项目
+
+如果这个知识库帮你省下了试错时间，欢迎请我喝杯咖啡。所有打赏用于服务器与模型调用开销，以及知识库的持续更新。
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/sponsor/wechat-pay.jpg" width="260" alt="微信支付"></td>
+    <td align="center"><img src="assets/sponsor/alipay.jpg" width="260" alt="支付宝"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>微信支付</b></td>
+    <td align="center"><b>支付宝</b></td>
+  </tr>
+</table>
+
