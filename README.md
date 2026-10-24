@@ -1,6 +1,6 @@
 # ai-anime-production-kb
 
-面向 AI 智能体的**影视化生产知识库** —— 从提示词工程到剪辑合成的全流程实战沉淀，共 **13 大类 483 条目**。
+面向 AI 智能体的**影视化生产知识库** —— 从提示词工程到剪辑合成的全流程实战沉淀，共 **14 大类 483 条目 + 16 个技法库（约 1400 条技法）**。
 
 ## 简介
 
@@ -19,7 +19,7 @@
 
 ## 目录结构
 
-共 **13 大类 483 条目**。每个条目是独立的 Markdown 文件，按编号 + 主题命名，便于智能体定向检索、按需加载。
+共 **14 大类 483 条目 + 16 个技法库（约 1400 条技法）**。每个条目是独立的 Markdown 文件，按编号 + 主题命名，便于智能体定向检索、按需加载。
 
 | 目录 | 覆盖内容 | 条目数 |
 |---|---|---|
@@ -36,6 +36,7 @@
 | **11-案例拆解** | 经典镜头逐帧拆解、张力案例库 | 21 |
 | **12-规范与踩坑** | 制作规范、常见崩坏与规避 | 10 |
 | **13-技能与流程** | 工作流、管线设计、资产表规范 | 8 |
+| **14-技法词库** | 16 个 100+ 技法库：镜头/特写/打斗/群战/法术/特效/转场/声音/情绪/对话/喜剧/日常/场景/悬念 | 16 |
 
 ### 条目明细
 
@@ -597,6 +598,28 @@
 - [Skill_逐镜资产核对_episode-shot-asset-audit](13-技能与流程/Skill_逐镜资产核对_episode-shot-asset-audit.md)
 - [番剧制作四件套交付规范](13-技能与流程/番剧制作四件套交付规范.md)
 - [逐镜资产清单模板](13-技能与流程/逐镜资产清单模板.md)
+
+</details>
+
+<details>
+<summary><b>14-技法词库</b>（16 个库，约 1400 条技法） — 每条附可直接粘贴的英文提示词短语</summary>
+
+- [lib_camera_100](14-技法词库/lib_camera_100.md)
+- [lib_classfight_100](14-技法词库/lib_classfight_100.md)
+- [lib_closeup_100](14-技法词库/lib_closeup_100.md)
+- [lib_comedy_100](14-技法词库/lib_comedy_100.md)
+- [lib_dailylife_100](14-技法词库/lib_dailylife_100.md)
+- [lib_dialogue_100](14-技法词库/lib_dialogue_100.md)
+- [lib_emotion_100](14-技法词库/lib_emotion_100.md)
+- [lib_ensemble_100](14-技法词库/lib_ensemble_100.md)
+- [lib_expand_100](14-技法词库/lib_expand_100.md)
+- [lib_fight_100](14-技法词库/lib_fight_100.md)
+- [lib_scene_100](14-技法词库/lib_scene_100.md)
+- [lib_sound_100](14-技法词库/lib_sound_100.md)
+- [lib_spell_100](14-技法词库/lib_spell_100.md)
+- [lib_suspense_100](14-技法词库/lib_suspense_100.md)
+- [lib_transition_100](14-技法词库/lib_transition_100.md)
+- [lib_vfxshot_100](14-技法词库/lib_vfxshot_100.md)
 
 </details>
 
