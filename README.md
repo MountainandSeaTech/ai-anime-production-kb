@@ -13,8 +13,13 @@
 提供配套自检脚本 [tools/check_script.py](tools/check_script.py)：输入一份剧本，自动解析它需要的 14 类能力，对照本库统计供给，输出「缺失 / 薄弱 / 充足」报告并推荐应加载的文件。
 
 ```bash
-python tools/check_script.py 剧本.md --md 报告.md --per-shot
+python tools/check_script.py 剧本.md --md 报告.md
+python tools/check_script.py 剧本.md --semantic --target wan3
 ```
+
+- `--semantic`：用字符 bigram TF-IDF 余弦做语义匹配，按段落给出最相关条目（默认按能力词表匹配）
+- `--target wan3`：只统计 Wan/可灵等目标模型适用的条目，剔除仅适配 Midjourney/SD/Sora 的条目
+- `--per-shot`：输出逐段推荐文件清单
 
 （脚本会自动识别两种布局：本地 `entries/` 目录，或仓库中直接位于根下的分类目录。）
 

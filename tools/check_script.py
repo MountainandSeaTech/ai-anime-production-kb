@@ -2,17 +2,24 @@
 """剧本能力覆盖检查
 
 用法:
-    python check_script.py <剧本.md> [--md 报告.md] [--per-shot]
+    python check_script.py <剧本.md> [--md 报告.md] [--per-shot] [--semantic] [--target wan3]
 
 作用:
     1. 解析剧本，识别它需要哪些「影视化生产能力」（镜头/动作/张力/特效...）
     2. 对照本地知识库统计每项能力的供给条目数
     3. 标出缺失与薄弱项，并给出应优先加载的条目文件
+
+选项:
+    --per-shot   逐段推荐应加载的条目
+    --semantic   用字符 bigram TF-IDF 余弦做语义相似度匹配，替代能力词表匹配
+    --target     只统计目标模型的条目（wan3 = 万相/可灵/WAN3 通用条目，剔除仅适配其他模型的条目）
 """
+import io
+import math
 import os
 import re
 import sys
-import io
+from collections import Counter
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
@@ -62,10 +69,42 @@ DIMENSIONS = {
     "叙事与结构": ["开场", "铺垫", "转折", "高潮", "结局", "伏笔", "闪回", "悬念", "钩子", "旁支", "收束"],
 }
 
+# 目标模型过滤：只保留与该模型相关、或未绑定特定模型的条目
+TARGET_MODELS = {
+    "wan3": {
+        "hit": ["wan", "万相", "万相2", "可灵", "kling", "通义", "即梦", "seedance", "vidu"],
+        "drop": ["midjourney", "stable diffusion", "sd1.5", "sdxl", "sora", "runway gen-2", "pika", "luma"],
+    },
+}
 
-def load_kb():
-    """读取全部条目：标题、标签、简介，用于供给统计。"""
+
+def parse_frontmatter(text):
+    meta = {}
+    body = text
+    if text.startswith("---"):
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            body = parts[2]
+            for line in parts[1].splitlines():
+                if ":" in line:
+                    k, _, v = line.partition(":")
+                    meta[k.strip()] = v.strip().strip("'\"")
+    return meta, body
+
+
+def lib_key(stem):
+    """识别技法库文件的去重键：472-lib-emotion-100 / lib_emotion_100 → lib_emotion。"""
+    s = re.sub(r"^\d+-", "", stem)
+    s = s.replace("-100", "").replace("_100", "").replace("-", "_")
+    return s if s.startswith("lib_") else ""
+
+
+def load_kb(target=None):
+    """读取全部条目：标题、标签、简介、正文。"""
     items = []
+    rule = TARGET_MODELS.get(target or "", None)
+    dropped = 0
+    seen_lib = {}
     for cat in sorted(os.listdir(ENTRIES)):
         cat_dir = os.path.join(ENTRIES, cat)
         if not os.path.isdir(cat_dir):
@@ -75,22 +114,32 @@ def load_kb():
                 continue
             path = os.path.join(cat_dir, fn)
             text = open(path, encoding="utf-8", errors="replace").read()
-            meta = {}
-            if text.startswith("---"):
-                parts = text.split("---", 2)
-                if len(parts) >= 3:
-                    for line in parts[1].splitlines():
-                        if ":" in line:
-                            k, _, v = line.partition(":")
-                            meta[k.strip()] = v.strip().strip("'\"")
+            meta, body = parse_frontmatter(text)
+            if rule:
+                blob = (meta.get("title", "") + " " + meta.get("tags", "") + " " +
+                        meta.get("summary", "") + " " + body).lower()
+                if any(w in blob for w in rule["drop"]) and not any(w in blob for w in rule["hit"]):
+                    dropped += 1
+                    continue
+            key = lib_key(os.path.splitext(fn)[0])
+            if key:
+                # 同一技法库存在多份拷贝时，只保留 14-技法词库 下的版本
+                if key in seen_lib:
+                    if cat == "14-技法词库":
+                        items[seen_lib[key]] = None
+                    else:
+                        dropped += 1
+                        continue
+                seen_lib[key] = len(items)
             items.append({
                 "title": meta.get("title") or os.path.splitext(fn)[0],
                 "tags": meta.get("tags", ""),
                 "summary": meta.get("summary", ""),
+                "body": body,
                 "path": f"{cat}/{fn}",
                 "cat": cat,
             })
-    return items
+    return [it for it in items if it], dropped
 
 
 def analyze_script(text):
@@ -99,46 +148,98 @@ def analyze_script(text):
     sections = re.split(r"^(?=##\s)", body, flags=re.M)
     result = []
     for sec in sections:
-        head = sec.splitlines()[0].strip("# ").strip() if sec.strip() else ""
-        if not head:
+        if not sec.strip():
             continue
+        head = sec.splitlines()[0].strip("# ").strip()
+        if not head:
+            head = "（开篇）"
         sec = re.sub(r"^\s*>\s*.*$", "", sec, flags=re.M)
         hits = {}
         for dim, words in DIMENSIONS.items():
             n = sum(sec.count(w) for w in words)
             if n:
                 hits[dim] = n
-        if hits:
-            result.append((head, hits))
+        result.append((head, sec, hits))
     return result
 
 
+# ---------- 语义匹配：字符 bigram TF-IDF 余弦 ----------
+
+def tokens(text):
+    text = re.sub(r"[^\w\u4e00-\u9fff]+", " ", text.lower())
+    toks = []
+    for chunk in text.split():
+        if re.search(r"[\u4e00-\u9fff]", chunk):
+            toks.extend(chunk[i:i + 2] for i in range(len(chunk) - 1))
+            toks.extend(chunk)  # 单字也保留，短词可命中
+        else:
+            toks.append(chunk)
+    return toks
+
+
+def build_vectors(items):
+    docs = [Counter(tokens(it["title"] + " " + it["tags"] + " " + it["summary"] + " " + it["body"]))
+            for it in items]
+    df = Counter()
+    for d in docs:
+        df.update(set(d))
+    n = len(docs)
+    idf = {t: math.log((n + 1) / (c + 1)) + 1 for t, c in df.items()}
+    vecs = []
+    for d in docs:
+        v = {t: (1 + math.log(c)) * idf[t] for t, c in d.items() if t in idf}
+        norm = math.sqrt(sum(x * x for x in v.values())) or 1.0
+        vecs.append({t: x / norm for t, x in v.items()})
+    return vecs, idf
+
+
+def cosine(qvec, dvec):
+    if len(qvec) > len(dvec):
+        qvec, dvec = dvec, qvec
+    return sum(x * dvec.get(t, 0.0) for t, x in qvec.items())
+
+
+def semantic_rank(section_text, items, vecs, idf):
+    q = Counter(tokens(section_text))
+    qv = {t: (1 + math.log(c)) * idf[t] for t, c in q.items() if t in idf}
+    norm = math.sqrt(sum(x * x for x in qv.values())) or 1.0
+    qv = {t: x / norm for t, x in qv.items()}
+    scored = [(cosine(qv, v), it) for v, it in zip(vecs, items)]
+    scored.sort(key=lambda x: -x[0])
+    return scored
+
+
 def main():
-    args = [a for a in sys.argv[1:]]
+    argv = sys.argv[1:]
     md_out = None
-    per_shot = "--per-shot" in args
-    args = [a for a in args if not a.startswith("--")]
-    if "--md" in sys.argv:
-        md_out = sys.argv[sys.argv.index("--md") + 1]
-        args = [a for a in args if a != md_out]
+    if "--md" in argv:
+        i = argv.index("--md")
+        md_out = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
+    target = None
+    if "--target" in argv:
+        i = argv.index("--target")
+        target = argv[i + 1].lower()
+        argv = argv[:i] + argv[i + 2:]
+    per_shot = "--per-shot" in argv
+    semantic = "--semantic" in argv
+    args = [a for a in argv if not a.startswith("--")]
     if not args:
-        print("用法: python check_script.py <剧本.md> [--md 报告.md] [--per-shot]")
+        print("用法: python check_script.py <剧本.md> [--md 报告.md] [--per-shot] [--semantic] [--target wan3]")
         return
 
     script_path = args[0]
     text = open(script_path, encoding="utf-8", errors="replace").read()
     sections = analyze_script(text)
-    kb = load_kb()
+    kb, dropped = load_kb(target)
 
-    # 剧本侧：各能力被多少段落需要
     need = {d: 0 for d in DIMENSIONS}
     need_raw = {d: 0 for d in DIMENSIONS}
-    for _, hits in sections:
+    for _, _, hits in sections:
         for d, n in hits.items():
             need[d] += 1
             need_raw[d] += n
 
-    # 知识库侧：各能力的供给条目
     supply = {d: [] for d in DIMENSIONS}
     for it in kb:
         blob = f"{it['title']} {it['tags']} {it['summary']}"
@@ -147,19 +248,22 @@ def main():
                 supply[d].append(it)
 
     order = sorted(DIMENSIONS, key=lambda d: -need[d])
-    lines = []
-    lines.append(f"# 剧本能力覆盖报告\n")
+    lines = [f"# 剧本能力覆盖报告\n"]
     lines.append(f"- 剧本：`{os.path.basename(script_path)}`（{len(sections)} 个分段）")
-    lines.append(f"- 知识库：`{ENTRIES}`（{len(kb)} 个条目）\n")
+    scope_note = f"（target={target}，剔除非目标模型条目 {dropped} 条）" if target else f"（全部 {len(kb)} 条）"
+    lines.append(f"- 知识库：`{ENTRIES}` {scope_note}")
+    if semantic:
+        lines.append("- 匹配方式：字符 bigram TF-IDF 语义相似度")
+    lines.append("")
+
     lines.append("## 一、需求 × 供给总览\n")
     lines.append("| 能力维度 | 需要段落 | 剧本提及次数 | 知识库条目 | 判定 |")
     lines.append("|---|---|---|---|---|")
-
     gaps, weak = [], []
     for d in order:
-        s = len(supply[d])
         if need[d] == 0:
             continue
+        s = len(supply[d])
         if s == 0:
             verdict = "**缺失**"
             gaps.append(d)
@@ -169,7 +273,6 @@ def main():
         else:
             verdict = "充足"
         lines.append(f"| {d} | {need[d]} | {need_raw[d]} | {s} | {verdict} |")
-
     unneeded = [d for d in order if need[d] == 0]
     if unneeded:
         lines.append(f"\n剧本未涉及：{'、'.join(unneeded)}\n")
@@ -180,13 +283,22 @@ def main():
     for d in gaps:
         lines.append(f"- **{d}**：剧本需要但库里没有对应条目 → 需新增")
     for d in weak:
-        top = supply[d]
-        names = "、".join(t["title"] for t in top)
-        lines.append(f"- **{d}**：仅 {len(top)} 条（{names}）→ 建议补充 2–3 条专项")
+        names = "、".join(t["title"] for t in supply[d])
+        lines.append(f"- **{d}**：仅 {len(supply[d])} 条（{names}）→ 建议补充 2–3 条专项")
 
-    lines.append("\n## 三、按段落推荐加载（每段取供给最充足的维度前 2 条）\n")
-    if per_shot:
-        for head, hits in sections:
+    lines.append("\n## 三、推荐加载\n")
+    if semantic:
+        vecs, idf = build_vectors(kb)
+        lines.append("| 分段 | 最相关条目（相似度） |")
+        lines.append("|---|---|")
+        for head, sec, _ in sections:
+            top = [(s, it) for s, it in semantic_rank(sec, kb, vecs, idf) if s > 0.02][:3]
+            if not top:
+                continue
+            cell = "<br>".join(f"`{it['path']}` {it['title']}（{s:.2f}）" for s, it in top)
+            lines.append(f"| {head} | {cell} |")
+    elif per_shot:
+        for head, _, hits in sections:
             dims = sorted(hits, key=lambda d: -hits[d])
             recs = []
             for d in dims:
@@ -201,7 +313,7 @@ def main():
                     lines.append(f"- `{it['path']}` {it['title']}")
                 lines.append("")
     else:
-        lines.append("（加 `--per-shot` 可输出逐段推荐文件）\n")
+        lines.append("（加 `--per-shot` 输出逐段推荐；加 `--semantic` 输出语义相似推荐）\n")
 
     report = "\n".join(lines)
     print(report)
